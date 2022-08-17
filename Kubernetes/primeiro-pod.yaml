@@ -6,10 +6,3 @@ spec:
   containers:
   - name: primeiro-pod-declarativo
     image: nginx:latest
-    resources:
-      limits:
-        memory: "128Mi"
-        cpu: "500m"
-    ports:
-      - containerPort: 8080
-      - hostPort: 8080
