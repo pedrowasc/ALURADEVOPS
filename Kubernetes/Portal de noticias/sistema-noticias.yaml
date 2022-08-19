@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: sistema-noticias
+  labels:
+    app: sistema-noticias
+spec:
+  containers:
+    - name: sistema-noticias
+      image: aluracursos/sistema-noticias:1
+      ports:
+        - containerPort: 80
+      env:
+        - name: "HOST_DB"
+          value: "10.104.106.69"
+        - name: "USER_DB"
+          value: ""
+        - name: "PASS_DB"
+          value: 
+        - name: "DATABASE_DB"
+          value: 
