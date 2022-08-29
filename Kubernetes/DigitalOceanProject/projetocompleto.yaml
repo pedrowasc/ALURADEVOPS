@@ -1,0 +1,133 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: db-configmap
+data:
+  MYSQL_ROOT_PASSWORD: q1w2e3r4
+  MYSQL_DATABASE: empresa
+  MYSQL_PASSWORD: q1w2e3r4
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: sistema-configmap
+data:
+  HOST_DB: svc-db-noticias:3306
+  USER_DB: root
+  PASS_DB: q1w2e3r4
+  DATABASE_DB: empresa
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: portal-configmap
+data:
+  IP_SISTEMA: http://localhost:30001
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: db-noticias
+  labels:
+    app: db-noticias
+spec:
+  containers:
+    - name: db-noticias-container
+      image: aluracursos/mysql-db:1
+      ports:
+        - containerPort: 3306
+      envFrom:
+        - configMapRef:
+            name: db-configmap
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata: 
+  name: portal-noticias-deployment
+spec: 
+  template:
+    metadata:
+      name: portal-noticias
+      labels:
+        app: portal-noticias
+    spec:
+      containers:
+        - name: portal-noticias-container
+          image: aluracursos/portal-noticias:1
+          ports:
+            - containerPort: 80
+          envFrom:
+            - configMapRef:
+                name: portal-configmap
+  replicas: 4
+  selector:
+    matchLabels:
+      app: portal-noticias
+#kubectl rollout history deployment portal-noticias-deployment
+#kubectl annotate deployment portal-noticias-deployment kubernetes.io/change-cause="primeito deploy"
+#kubectl rollout undo deployment portal-noticias-deployment --to-revision=<versão a ser retornada>
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sistema-noticias-deployment
+spec:
+  template: 
+    metadata:
+      name: sistema-noticias
+      labels:
+        app: sistema-noticias
+    spec:
+      containers:
+        - name: noticias-container-deploymento
+          image: aluracursos/sistema-noticias:1
+          ports:
+            - containerPort: 80
+          envFrom:
+            - configMapRef:
+                name: sistema-configmap
+  replicas: 2
+  selector: 
+    matchLabels: 
+      app: sistema-noticias
+#kubectl rollout history deployment sistema-noticias-deployment
+#kubectl annotate deployment sistema-noticias-deployment kubernetes.io/change-cause="primeito deploy"
+#kubectl rollout undo deployment sistema-noticias-deployment --to-revision=<versão a ser retornada>
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-db-noticias
+spec:
+  type: ClusterIP
+  ports:
+    - port: 3306
+  selector:
+    app: db-noticias
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-portal-noticias
+spec:
+  type: LoadBalancer
+  ports:
+   - port: 30000
+     targetPort: 80
+     nodePort: 30000
+  selector:
+    app: portal-noticias
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-sistema-noticias
+spec:
+  type: LoadBalancer
+  ports:
+      - port: 30001
+        targetPort: 80
+        nodePort: 30001
+  selector:
+    app: sistema-noticias
