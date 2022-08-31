@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-volume
+  labels:
+    name: pod-volume
+spec:
+  containers:
+  - name: nginx
+    image: nginx:latest
+    ports:
+      - containerPort: 80
+    volumeMounts:
+      - mountPath: /volume-dentro-do-docker
+        name: primeiro-volume
+  - name: jenkins
+    image: jenkins:alpine
+    ports:
+      - containerPort: 80
+    volumeMounts:
+      - mountPath: /volume-dentro-do-docker
+        name: primeiro-volume
+  volumes:
+  - name: primeiro-volume
+    hostPath:
+      path: /C/users/wasc/desktop/primeiro-volume
+      type: directory

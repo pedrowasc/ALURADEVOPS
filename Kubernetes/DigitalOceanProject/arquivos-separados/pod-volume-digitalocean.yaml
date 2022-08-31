@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: pod-volume
+spec:
+  selector:
+    matchLabels:
+      app: pod-volume
+  serviceName: "pod-volume"
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: pod-volume
+    spec:
+      containers:
+      - name: nginx-pod
+        image: nginx:latest
+        args:
+        - sleep
+        - infinity
+        volumeMounts:
+        - mountPath: "/meu-volume-dentro-do-docker"
+          name: meu-primeiro-volume
+  volumeClaimTemplates:
+  - metadata:
+      name: meu-primeiro-volume
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 5Gi
+      storageClassName: do-block-storage
